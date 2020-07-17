@@ -6,6 +6,16 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
+var mysql = require('mysql');
+
+var db = mysql.createConnection({
+  host : 'localhost',
+  user : 'nodejs',
+  password : 'koos123456',
+  database : 'opentutorials'
+});
+
+
 
 router.get('/', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req,res);
@@ -21,7 +31,9 @@ router.get('/', (req, res) => {
     ${descrip}
    </p>
   </div>`)
-
+  db.query('select * from topic',function(error,topics){
+    console.log(topics);
+  })
     res.send(html);
 
 }) //route,routing 갈림길에서 적당한 응답을 해주는 역할
