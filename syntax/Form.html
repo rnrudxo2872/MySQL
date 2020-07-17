@@ -1,0 +1,68 @@
+<form action="http://localhost:3000/process_create" method="POST">
+    <p><input type="text" name="title" placeholder="title"></p>
+    <p>
+        <textarea name="description" id="" cols="30" rows="10" placeholder="discription"></textarea>
+    </p>
+    <p>
+        <input type="submit">
+    </p>
+</form>
+<!--전송을 하면 qurystring이 만들어진다.-->
+
+
+<form action="updata_process" method="POST">
+    <input type="hidden" name="id" value="${title}">
+    <p><input type="text" name="title" placeholder="title" value="${title}"></p>
+    <p>
+        <textarea name="description" id="" cols="30" rows="10" placeholder="discription">${discription}</textarea>
+    </p>
+    <p>
+        <input type="submit">
+    </p>
+</form>
+
+
+<style>
+input[type="submit"]{
+    width: 100%; /* 원하는 너비 설정 */ 
+    height: auto; /* 높이값 초기화 */ 
+    line-height : normal; /* line-height 초기화 */ 
+    padding: .8em .5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */ 
+    font-family: inherit; /* 폰트 상속 */ 
+    border: 1px solid #999; 
+    border-radius: 0; /* iSO 둥근모서리 제거 */ 
+    width:100px;
+    text-align: center;
+
+
+background-color: #af95c5;
+
+border: none;
+
+color:#fff;
+
+padding: 15px 0;
+
+text-align: center;
+
+text-decoration: none;
+
+display: inline-block;
+
+font-size: 15px;
+
+margin: 4px;
+
+cursor: pointer;
+
+
+
+출처: https://nimolove.tistory.com/44 [Chaeni_vlog 🌈]
+
+}
+</style>
+<form action="delete_process" method="POST" onsubmit="confirm('정말로 삭제하시겠습니까?')">
+    <input type="hidden" name="id" value="${title}">
+    <input type="submit" value="delete">
+</form>
+
