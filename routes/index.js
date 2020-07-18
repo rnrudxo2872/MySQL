@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req,res);
   console.log(IsOwner);
   db.query('select * from topic',function(error,topics){
-    console.log(topics);
+    console.log(topics[0].title);
 
     title = `Welcome to 경태's page`;
     let descrip = '안녕? 경태페이지란다';

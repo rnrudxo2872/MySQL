@@ -6,6 +6,14 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
+var mysql = require('mysql');
+
+var db = mysql.createConnection({
+  host : 'localhost',
+  password : 'koos123456',
+  user : 'nodejs',
+  database : 'opentutorials'
+})
 
 router.get('/page_create', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req,res);
@@ -99,19 +107,7 @@ router.get('/page_create', (req, res) => {
   })
   
   router.post('/delete_process',(req,res) => {
-    /*var body = '';
-    req.on('data', function (data) {
-      body += data;
-    })
-    req.on('end', function () {
-      var post = qs.parse(body);
-      var id = post.id;
-      filleredId = path.parse(id).base;
-      fs.unlink(`data/${id}`, (err) => {
-        res.redirect(302,`/`);
-        res.end();
-      })
-    })*/
+
     var post = req.body;
     var id = post.id;
     filleredId = path.parse(id).base;
@@ -123,35 +119,45 @@ router.get('/page_create', (req, res) => {
   
   
   router.get('/:pageId', (req, res, next) => {
-      title = req.params.pageId;
-      let filleredId = path.parse(req.params.pageId).base; //return confirm 해야지 false 시 페이지가 안넘어감
-      list = template.list(req.list, `<a href="/topic/page_create">create</a><br>
-                                  <a href="/topic/updata/${title}">updata</a><br>
-                                  <form action="/topic/delete_process" method="POST" onsubmit="return confirm('정말로 삭제하시겠습니까?')">
-                                  <input type="hidden" name="id" value="${title}">
-                                  <input type="submit" value="delete">
-                                  </form>`);
-      fs.readFile(`data/${filleredId}`, 'utf8', function (err, descrip) {
-        if(err){
-          next(err);
-        }else{
-          let sanitizedTitle = sanitizeHtml(title);
-          let sanitizedDiscript = sanitizeHtml(descrip, {
-            allowedTags: ['h1', 'h2'] //여기 허락된 태그는 sanitize(살균)를 안한다.
-          }, {
-            allowedIframeHostnames: ['www.youtube.com']
-          });
-          var html = template.HTML(sanitizedTitle, list, `<div id="article">
-          <img src="/images/${sanitizedTitle}.jpg" alt="" style="width:300px; display:block; margin-bottom: 5px;">
-          <h2>${sanitizedTitle}</h2>
-          <p>
-          ${sanitizedDiscript}
-         </p>
-        </div>`)
-          console.log(sanitizedTitle)
-          res.send(html)
+    db.query('select * from topic',function(error,topics){
+      if(error){
+        throw error;
       }
-    }) 
+      db.query('select * from topic where id=?',[req.params.pageId],function(error2,topic){
+        title = topic[0].title;
+        console.log(topic[0].title);
+        let filleredId = topic[0].title; //return confirm 해야지 false 시 페이지가 안넘어감
+        list = template.list(topics, `<a href="/topic/page_create">create</a><br>
+                                    <a href="/topic/updata/${title}">updata</a><br>
+                                    <form action="/topic/delete_process" method="POST" onsubmit="return confirm('정말로 삭제하시겠습니까?')">
+                                    <input type="hidden" name="id" value="${title}">
+                                    <input type="submit" value="delete">
+                                    </form>`);
+        fs.readFile(`data/${filleredId}`, 'utf8', function (err, descrip) {
+          if(err){
+            next(err);
+          }else{
+            let sanitizedTitle = sanitizeHtml(title);
+            let sanitizedDiscript = sanitizeHtml(descrip, {
+              allowedTags: ['h1', 'h2'] //여기 허락된 태그는 sanitize(살균)를 안한다.
+            }, {
+              allowedIframeHostnames: ['www.youtube.com']
+            });
+            var html = template.HTML(sanitizedTitle, list, `<div id="article">
+            <img src="/images/${sanitizedTitle}.jpg" alt="" style="width:300px; display:block; margin-bottom: 5px;">
+            <h2>${sanitizedTitle}</h2>
+            <p>
+            ${sanitizedDiscript}
+           </p>
+          </div>`)
+            console.log(sanitizedTitle)
+            res.send(html)
+        }
+      }) 
+
+      })
+    })
+
   });
 
   module.exports = router;

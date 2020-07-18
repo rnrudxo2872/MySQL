@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));//form data는 이런형식
                                                   //첫번째 인자인 req 뒤 body를 만들어줌
 
 
-app.get('*',function(req,res,next){
+app.get('*',function(req,res,next){ // *로 get으로 들어오는 모든 함수에 적용한다.
   fs.readdir('./data', function (error, filelist) {
   req.list = filelist;
   next(); //다음 middleware를 동작하게 결정 한다. 
