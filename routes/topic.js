@@ -49,63 +49,67 @@ router.get('/page_create', (req, res) => {
   })
   
   router.get('/updata/:pageId', (req, res) => {
-    title = req.params.pageId;
-    filleredId = path.parse(req.params.pageId).base;
-    list = template.list(req.list, ``);
-    fs.readFile(`data/${filleredId}`, 'utf8', function (err, descrip) {
-      var html = template.control_HTML(title, list, `<form action="/updata_process" method="POST">
-        <input type="hidden" name="id" value="${title}">
-        <p><input type="text" name="title" placeholder="title" value="${title}"></p>
-        <p>
-            <textarea name="description" id="" cols="30" rows="10" placeholder="discription">${descrip}</textarea>
-        </p>
-        <p>
-            <input type="submit">
-        </p>
-    </form>`)
-  
-      res.send(html);
-    });
+    //title = req.params.pageId;
+    console.log('update')
+    db.query('select * from topic',function(error,topics){
+      if(error){
+        throw error;
+      }
+      db.query('select * from topic where id = ?',[req.params.pageId],function(error2,topic){
+        list = template.list(topics, ``);
+        var html = template.control_HTML(topic[0].title, list, `<form action="/updata_process" method="POST">
+          <input type="hidden" name="id" value="${topic[0].id}">
+          <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
+          <p>
+              <textarea name="description" id="" cols="30" rows="10" placeholder="discription">${topic[0].description}</textarea>
+          </p>
+          <p>
+              <input type="submit">
+          </p>
+      </form>`)
+    
+        res.send(html);
+      })
+      
+    })
+    
+    
+      
   })
   
   router.post('/updata_process', (req, res) => {
-  /*var body = '';
-  req.on('data', function (data) {
-    body += data;
-  })
-  req.on('end', function () {
-    var post = qs.parse(body);
-    title = post.title;
-    var id = post.id;
-    description = post.description;
-    fs.rename(`./data/${id}`, `./data/${title}`, (err) => {
-      fs.writeFile(`./data/${title}`, description, 'utf8', (err) => {
-        res.redirect(302,`/page/${title}`); //redirect
-        res.end();
-      })
-    })
-  })*/
+
   var post = req.body;
-    title = post.title;
-    var id = post.id;
-    description = post.description;
-    fs.rename(`./data/${id}`, `./data/${title}`, (err) => {
-      fs.writeFile(`./data/${title}`, description, 'utf8', (err) => {
-        res.redirect(302,`/topic/${title}`); //redirect
-        res.end();
-      })
+
+  console.log(post.title);
+  console.log(post.description);
+  title = post.title;
+    db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`, [post.title, post.description, post.id], function(error, result){
+    res.redirect(302, `/topic/${post.id}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
+
+    res.end();
     })
   })
   
   router.post('/delete_process',(req,res) => {
 
-    var post = req.body;
-    var id = post.id;
-    filleredId = path.parse(id).base;
-    fs.unlink(`data/${id}`, (err) => {
-      res.redirect(302,`/`);
-      res.end();
-    })
+    // var post = req.body;
+    // var id = post.id;
+    // filleredId = path.parse(id).base;
+    // fs.unlink(`data/${id}`, (err) => {
+    //   res.redirect(302,`/`);
+    //   res.end();
+    // })
+    var body = '';
+    request.on('data', function(data){
+        body = body + data;
+    });
+    request.on('end', function(){
+        var post = qs.parse(body);
+        db.query('UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?', [post.title, post.description, post.id], function(error, result){
+          response.writeHead(302, {Location: `/?id=${post.id}`});
+          response.end();
+        })
   })
   
   
@@ -116,9 +120,9 @@ router.get('/page_create', (req, res) => {
       }
       db.query('select * from topic where id=?',[req.params.pageId],function(error2,topic){
         title = topic[0].title;
-        let filleredId = topic[0].title; //return confirm 해야지 false 시 페이지가 안넘어감
+        //let filleredId = topic[0].title; //return confirm 해야지 false 시 페이지가 안넘어감
         list = template.list(topics, `<a href="/topic/page_create">create</a><br>
-                                    <a href="/topic/updata/${title}">updata</a><br>
+                                    <a href="/topic/updata/${req.params.pageId}">updata</a><br>
                                     <form action="/topic/delete_process" method="POST" onsubmit="return confirm('정말로 삭제하시겠습니까?')">
                                     <input type="hidden" name="id" value="${title}">
                                     <input type="submit" value="delete">
