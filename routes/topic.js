@@ -20,7 +20,8 @@ router.get('/page_create', (req, res) => {
   console.log(IsOwner);
     title = `WEB - create`;
     let descrip = '안녕? 경태페이지란다';
-    var list = template.list(req.list, ``);
+    db.query('select * from topic',function(error,topics){
+      var list = template.list(topics, ``);
     var html = template.control_HTML(title, list, `<form action="/topic/create_process" method="POST">
     <p><input type="text" name="title" placeholder="title"></p>
     <p>
@@ -32,27 +33,17 @@ router.get('/page_create', (req, res) => {
   </form>`)
   
     res.send(html);
+
+    })
+    
   })
   
   router.post('/create_process', (req, res) => {
-  /*var body = '';
-  req.on('data', function (data) {
-    body += data; //조각조각 데이터가 들어옴
-  })
-  req.on('end', function () {
-    var post = qs.parse(body);
-    title = post.title;
-    description = post.description;
-    fs.writeFile(`./data/${title}`, description, (err) => {
-      res.redirect(302, `/page/${title}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
-      res.end();
-    })
-  })*/
-  var post = req.body;
-  title = post.title;
-  description = post.description;
-  fs.writeFile(`./data/${title}`, description, (err) => {
-    res.redirect(302, `/topic/${title}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
+   var post = req.body;
+
+  db.query(`INSERT INTO topic (title, description, created, author_id) 
+  VALUES(?, ?, NOW(),?)`,[post.title,post.description,1],function(error,result){
+    res.redirect(302, `/topic/${result.insertId}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
     res.end();
   })
   })
@@ -125,7 +116,6 @@ router.get('/page_create', (req, res) => {
       }
       db.query('select * from topic where id=?',[req.params.pageId],function(error2,topic){
         title = topic[0].title;
-        console.log(topic[0].title);
         let filleredId = topic[0].title; //return confirm 해야지 false 시 페이지가 안넘어감
         list = template.list(topics, `<a href="/topic/page_create">create</a><br>
                                     <a href="/topic/updata/${title}">updata</a><br>
@@ -133,18 +123,16 @@ router.get('/page_create', (req, res) => {
                                     <input type="hidden" name="id" value="${title}">
                                     <input type="submit" value="delete">
                                     </form>`);
-        fs.readFile(`data/${filleredId}`, 'utf8', function (err, descrip) {
-          if(err){
-            next(err);
-          }else{
+        
+          
             let sanitizedTitle = sanitizeHtml(title);
-            let sanitizedDiscript = sanitizeHtml(descrip, {
+            let sanitizedDiscript = sanitizeHtml(topic[0].description, {
               allowedTags: ['h1', 'h2'] //여기 허락된 태그는 sanitize(살균)를 안한다.
             }, {
               allowedIframeHostnames: ['www.youtube.com']
             });
             var html = template.HTML(sanitizedTitle, list, `<div id="article">
-            <img src="/images/${sanitizedTitle}.jpg" alt="" style="width:300px; display:block; margin-bottom: 5px;">
+            <img src="/images/${sanitizedTitle}.jpg" alt="Nonexistent" style="width:300px; display:block; margin-bottom: 5px;">
             <h2>${sanitizedTitle}</h2>
             <p>
             ${sanitizedDiscript}
@@ -152,8 +140,7 @@ router.get('/page_create', (req, res) => {
           </div>`)
             console.log(sanitizedTitle)
             res.send(html)
-        }
-      }) 
+  
 
       })
     })
