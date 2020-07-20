@@ -12,7 +12,8 @@ var db = mysql.createConnection({
   host: 'localhost',
   password: 'koos123456',
   user: 'nodejs',
-  database: 'opentutorials'
+  database: 'opentutorials',
+  multipleStatements: true
 })
 
 router.get('/page_create', (req, res) => {
@@ -57,24 +58,26 @@ router.get('/updata/:pageId', (req, res) => {
       throw error;
     }
     db.query('select * from topic where id = ?', [req.params.pageId], function (error2, topic) {
-      list = template.list(topics, ``);
+      db.query('select * from author',function(error3,authors){
+        list = template.list(topics, ``);
       var html = template.control_HTML(topic[0].title, list, `<form action="/topic/updata_process" method="POST">
           <input type="hidden" name="id" value="${topic[0].id}">
           <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
           <p>
               <textarea name="description" id="" cols="30" rows="10" placeholder="discription">${topic[0].description}</textarea>
           </p>
+          ${template.author_list(authors,topic[0].author_id)}
           <p>
               <input type="submit">
           </p>
       </form>`)
 
       res.send(html);
+      })
+      
     })
 
   })
-
-
 
 })
 
@@ -95,11 +98,19 @@ router.post('/delete_process', (req, res) => {
   // res.redirect(302,`/`);
   // res.end();
   // })
-
+db.query('select * from topic',function(error,topic){
   db.query('DELETE FROM topic WHERE id=?', [post.id], function (error, result) {
-    res.redirect(302, `/`);
-    res.end();
+    let length = topic.length+1;
+    db.query('SET @cnt = 0;'+
+              'UPDATE topic SET topic.id = @cnt:=@cnt+1;'+
+              'alter table topic auto_increment=?;',[length],function(error2,reresult){
+                res.redirect(302, `/`);
+                res.end();
+              })
+    
   })
+})
+  
 
 })
 
@@ -138,8 +149,6 @@ router.get('/:pageId', (req, res, next) => {
           </div>`)
       console.log(sanitizedTitle)
       res.send(html)
-
-
     })
   })
 
