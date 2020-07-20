@@ -6,15 +6,7 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
-var mysql = require('mysql');
-
-var db = mysql.createConnection({
-  host: 'localhost',
-  password: 'koos123456',
-  user: 'nodejs',
-  database: 'opentutorials',
-  multipleStatements: true
-})
+var db = require('../lib/db.js')
 
 router.get('/page_create', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req, res);
