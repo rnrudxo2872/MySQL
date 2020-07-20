@@ -108,7 +108,7 @@ router.get('/page_create', (req, res) => {
       if(error){
         throw error;
       }
-      db.query('select * from topic where id=?',[req.params.pageId],function(error2,topic){
+      db.query('SELECT * FROM topic LEFT JOIN author ON topic.author_id = author.id WHERE topic.id=?',[req.params.pageId],function(error2,topic){
         title = topic[0].title;
         //let filleredId = topic[0].title; //return confirm 해야지 false 시 페이지가 안넘어감
         list = template.list(topics, `<a href="/topic/page_create">create</a><br>
@@ -130,6 +130,9 @@ router.get('/page_create', (req, res) => {
             <h2>${sanitizedTitle}</h2>
             <p>
             ${sanitizedDiscript}
+           </p>
+           <p>
+           <span style="color:white;border:1px solid aquamarine;border-radius:10%;background-color: coral;opacity: 0.5;">by ${topic[0].author}</span>
            </p>
           </div>`)
             console.log(sanitizedTitle)
