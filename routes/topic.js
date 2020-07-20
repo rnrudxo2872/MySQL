@@ -50,14 +50,13 @@ router.get('/page_create', (req, res) => {
   
   router.get('/updata/:pageId', (req, res) => {
     //title = req.params.pageId;
-    console.log('update')
     db.query('select * from topic',function(error,topics){
       if(error){
         throw error;
       }
       db.query('select * from topic where id = ?',[req.params.pageId],function(error2,topic){
         list = template.list(topics, ``);
-        var html = template.control_HTML(topic[0].title, list, `<form action="/updata_process" method="POST">
+        var html = template.control_HTML(topic[0].title, list, `<form action="/topic/updata_process" method="POST">
           <input type="hidden" name="id" value="${topic[0].id}">
           <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
           <p>
@@ -78,11 +77,7 @@ router.get('/page_create', (req, res) => {
   })
   
   router.post('/updata_process', (req, res) => {
-
   var post = req.body;
-
-  console.log(post.title);
-  console.log(post.description);
   title = post.title;
     db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`, [post.title, post.description, post.id], function(error, result){
     res.redirect(302, `/topic/${post.id}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
@@ -93,23 +88,18 @@ router.get('/page_create', (req, res) => {
   
   router.post('/delete_process',(req,res) => {
 
-    // var post = req.body;
-    // var id = post.id;
-    // filleredId = path.parse(id).base;
+    var post = req.body;
+    var id = post.id;
     // fs.unlink(`data/${id}`, (err) => {
-    //   res.redirect(302,`/`);
-    //   res.end();
+      // res.redirect(302,`/`);
+      // res.end();
     // })
-    var body = '';
-    request.on('data', function(data){
-        body = body + data;
-    });
-    request.on('end', function(){
-        var post = qs.parse(body);
-        db.query('UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?', [post.title, post.description, post.id], function(error, result){
-          response.writeHead(302, {Location: `/?id=${post.id}`});
-          response.end();
-        })
+
+    db.query('DELETE FROM topic WHERE id=?',[post.id],function(error,result){
+      res.redirect(302,`/`);
+      res.end();
+    })
+
   })
   
   
@@ -124,7 +114,7 @@ router.get('/page_create', (req, res) => {
         list = template.list(topics, `<a href="/topic/page_create">create</a><br>
                                     <a href="/topic/updata/${req.params.pageId}">updata</a><br>
                                     <form action="/topic/delete_process" method="POST" onsubmit="return confirm('정말로 삭제하시겠습니까?')">
-                                    <input type="hidden" name="id" value="${title}">
+                                    <input type="hidden" name="id" value="${req.params.pageId}">
                                     <input type="submit" value="delete">
                                     </form>`);
         
