@@ -69,4 +69,36 @@ router.post('/create_process',(req,res) => {
     })
 });
 
+router.get('/update/:authorId',(req,res) =>{
+    
+    db.query(`select * from topic`,function(error,topics){
+        db.query(`select * from author where id=?`,[req.params.authorId],function(error2,author){
+            list = template.list(topics, ``);
+            var html = template.control_HTML('Author_update', list, `<form action="/author/updata_process" method="POST">
+              <input type="hidden" name="id" value="${author[0].id}">
+              <p>
+              <input type="text" name="author" placeholder="author name" value="${author[0].author}">
+              </p>
+              <p>
+              <input type="text" name="profile" placeholder="information" value="${author[0].profile}">
+              </p>
+              <p>
+                  <input type="submit">
+              </p>
+          </form>`)
+    
+            res.send(html);
+        })
+    })
+});
+
+router.post('/updata_process',(req,res) => {
+    let post = req.body;
+    
+    db.query(`UPDATE author SET author=?, profile=? where id=?`,[post.author,post.profile,post.id],function(error,result){
+       res.redirect(302,`/author`);
+       res.end(); 
+    })
+})
+
 module.exports = router;
