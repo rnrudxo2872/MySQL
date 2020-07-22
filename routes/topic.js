@@ -12,8 +12,6 @@ router.get('/page_create', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req, res);
   console.log(IsOwner);
   title = `WEB - create`;
-  let descrip = '안녕? 경태페이지란다';
-
   db.query('select * from topic', function (error, topics) {
     db.query('select * from author', function (error2, authors) {
       var list = template.list(topics, ``);

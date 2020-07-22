@@ -8,7 +8,9 @@ var template = require('./lib/template.js');
 var topicRouter = require('./routes/topic');
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
+var authorRouter = require('./routes/author');
 var authIsOwner = require('./lib/authLogin');
+
 var cookie = require('cookie');
 var helmet = require('helmet');
 app.use(helmet());
@@ -39,8 +41,7 @@ const port = 3000;
 app.use('/',indexRouter);
 app.use('/login',loginRouter);
 app.use('/topic',topicRouter);
-
-
+app.use('/author',authorRouter);
 
 app.use(function(req,res,next){
   res.status(404).send('Sorry you wrong')
