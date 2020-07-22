@@ -101,4 +101,22 @@ router.post('/updata_process',(req,res) => {
     })
 })
 
+router.post('/delete_process',(req,res) =>{
+    let post = req.body;
+    console.log("delelelelel")
+    db.query('select * from author', function (error, authors) {
+        db.query('DELETE FROM author WHERE id=?', [post.id], function (error, result) {
+          let length = authors.length;
+          db.query('SET @cnt = 0;' +
+            'UPDATE author SET author.id = @cnt:=@cnt+1;' +
+            'alter table author auto_increment=?;', [length],
+            function (error2, reresult) {
+              res.redirect(302, `/author`);
+              res.end();
+            })
+    
+        })
+      })
+})
+
 module.exports = router;
