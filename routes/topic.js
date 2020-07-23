@@ -36,19 +36,27 @@ router.post('/create_process', (req, res) => {
 
   db.query(`INSERT INTO topic (title, description, created, author_id) 
   VALUES(?, ?, NOW(),?)`, [post.title, post.description, post.author], function (error, result) {
+    if(error){
+      throw error;
+    }
     res.redirect(302, `/topic/${result.insertId}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
     res.end();
   })
 })
 
 router.get('/updata/:pageId', (req, res) => {
-  //title = req.params.pageId;
   db.query('select * from topic', function (error, topics) {
     if (error) {
       throw error;
     }
     db.query('select * from topic where id = ?', [req.params.pageId], function (error2, topic) {
+      if(error2){
+        throw error2;
+      }
       db.query('select * from author', function (error3, authors) {
+        if(error3){
+          throw error3;
+        }
         list = template.list(topics, ``);
         var html = template.control_HTML(topic[0].title, list, `<form action="/topic/updata_process" method="POST">
           <input type="hidden" name="id" value="${topic[0].id}">
@@ -61,20 +69,16 @@ router.get('/updata/:pageId', (req, res) => {
               <input type="submit">
           </p>
       </form>`)
-
         res.send(html);
       })
-
     })
-
   })
-
 })
 
 router.post('/updata_process', (req, res) => {
   var post = req.body;
   title = post.title;
-  db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`, [post.title, post.description, post.id], function (error, result) {
+  db.query(`UPDATE topic SET title=?, description=?, author_id=? WHERE id=?`, [post.title, post.description, post.author, post.id], function (error, result) {
     res.redirect(302, `/topic/${post.id}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
 
     res.end();
@@ -98,11 +102,8 @@ router.post('/delete_process', (req, res) => {
           res.redirect(302, `/`);
           res.end();
         })
-
     })
   })
-
-
 })
 
 
@@ -142,7 +143,6 @@ router.get('/:pageId', (req, res, next) => {
       res.send(html)
     })
   })
-
 });
 
 module.exports = router;
