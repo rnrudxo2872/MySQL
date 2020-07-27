@@ -7,14 +7,7 @@ var template = require('../lib/template.js');
 var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
 var mysql = require('mysql');
-
-var db = mysql.createConnection({
-  host : 'localhost',
-  user : 'nodejs',
-  password : 'koos123456',
-  database : 'opentutorials'
-});
-
+var db = require('../lib/db');
 
 
 router.get('/', (req, res) => {

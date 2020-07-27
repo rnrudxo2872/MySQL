@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var db = require('../lib/db.js')
 var template = require('../lib/template.js');
-var sanitizeHtml = require('sanitize-html');
+var sanitizeHtml = require('sanitize-html'); //create 혹은 update시 코드를 입력하여 에러 발생 방지.
 var sortdb = require('../lib/resortdb.js');
 
 router.get('', (req, res) => {

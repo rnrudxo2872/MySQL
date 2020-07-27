@@ -7,6 +7,7 @@ var topicRouter = require('./routes/topic');
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var authorRouter = require('./routes/author');
+var serchRouter = require('./routes/serch');
 var authIsOwner = require('./lib/authLogin');
 
 var cookie = require('cookie');
@@ -40,6 +41,7 @@ app.use('/',indexRouter);
 app.use('/login',loginRouter);
 app.use('/topic',topicRouter);
 app.use('/author',authorRouter);
+app.use('/serch',serchRouter);
 
 app.use(function(req,res,next){
   res.status(404).send('Sorry you wrong')
