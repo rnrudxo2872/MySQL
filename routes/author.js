@@ -3,6 +3,7 @@ var router = express.Router();
 var db = require('../lib/db.js')
 var template = require('../lib/template.js');
 var sanitizeHtml = require('sanitize-html');
+var sortdb = require('../lib/resortdb.js');
 
 router.get('', (req, res) => {
   db.query('select * from topic', function (error, topics) {
@@ -103,15 +104,15 @@ router.post('/updata_process', (req, res) => {
 
 router.post('/delete_process', (req, res) => {
   let post = req.body;
-  console.log("delelelelel")
   db.query('select * from author', function (error, authors) {
     db.query('DELETE FROM author WHERE id=?', [post.id], function (error, result) {
       let length = authors.length;
-      db.query('SET @cnt = 0;' +
+      var ere =sortdb.query('SET @cnt = 0;' +
         'UPDATE author SET author.id = @cnt:=@cnt+1;' +
         'alter table author auto_increment=?;', [length],
         function (error2, reresult) {
           res.redirect(302, `/author`);
+          console.log(ere.sql);
           res.end();
         })
 

@@ -6,7 +6,8 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
-var db = require('../lib/db.js')
+var db = require('../lib/db.js');
+var sortdb = require('../lib/resortdb.js');
 
 router.get('/page_create', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req, res);
@@ -80,7 +81,6 @@ router.post('/updata_process', (req, res) => {
   title = post.title;
   db.query(`UPDATE topic SET title=?, description=?, author_id=? WHERE id=?`, [post.title, post.description, post.author, post.id], function (error, result) {
     res.redirect(302, `/topic/${post.id}`) //redirect과정 = res.writeHead(302, {Location: `/page/${title}) 
-
     res.end();
   })
 })
@@ -95,7 +95,7 @@ router.post('/delete_process', (req, res) => {
   db.query('select * from topic', function (error, topic) {
     db.query('DELETE FROM topic WHERE id=?', [post.id], function (error, result) {
       let length = topic.length;
-      db.query('SET @cnt = 0;' +
+      sortdb.query('SET @cnt = 0;' +
         'UPDATE topic SET topic.id = @cnt:=@cnt+1;' +
         'alter table topic auto_increment=?;', [length],
         function (error2, reresult) {
