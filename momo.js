@@ -52,4 +52,4 @@ app.use(function (err, req, res, next) { //err인자 값이 있을시 호출
   res.status(500).send('Something broke! (ex. address wrong)')
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Project app listening on port ${port}!`))
