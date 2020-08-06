@@ -8,6 +8,16 @@ var authIsOwner = require('../lib/authLogin');
 var cookie = require('cookie');
 var db = require('../lib/db.js');
 var sortdb = require('../lib/resortdb.js');
+const multer = require('multer');
+const _storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname)
+  }
+})
+const upload = multer({storage : _storage });
 
 router.get('/page_create', (req, res) => {
   var IsOwner = authIsOwner.IsOwner(req, res);
@@ -16,15 +26,16 @@ router.get('/page_create', (req, res) => {
   db.query('select * from topic', function (error, topics) {
     db.query('select * from author', function (error2, authors) {
       var list = template.list(topics, ``);
-      var html = template.control_HTML(title, list, `<form action="/topic/create_process" method="POST">
+      var html = template.control_HTML(title, list, `<form action="/topic/create_process" method="POST" enctype="multipart/form-data">
     <p><input type="text" name="title" placeholder="title"></p>
     <p>
         <textarea name="description" id="" cols="30" rows="10" placeholder="discription"></textarea>
     </p>
     ${template.author_list(authors)}
     <p>
-        <input type="submit">
+    <input type="file" name="image">
     </p>
+    <input type="submit">
   </form>`)
 
       res.send(html);
@@ -32,8 +43,9 @@ router.get('/page_create', (req, res) => {
   })
 })
 
-router.post('/create_process', (req, res) => {
+router.post('/create_process', upload.single('image'), (req, res) => {
   var post = req.body;
+  console.log(post);
 
   db.query(`INSERT INTO topic (title, description, created, author_id) 
   VALUES(?, ?, NOW(),?)`, [post.title, post.description, post.author], function (error, result) {
@@ -92,9 +104,11 @@ router.post('/delete_process', (req, res) => {
   // res.redirect(302,`/`);
   // res.end();
   // })
+  fs.unlinkSync(`public/images/${post.title}.jpg`);
   db.query('select * from topic', function (error, topic) {
     db.query('DELETE FROM topic WHERE id=?', [post.id], function (error, result) {
       let length = topic.length;
+      //fs.unlinkSync('/pu')
       sortdb.query('SET @cnt = 0;' +
         'UPDATE topic SET topic.id = @cnt:=@cnt+1;' +
         'alter table topic auto_increment=?;', [length],
@@ -119,6 +133,7 @@ router.get('/:pageId', (req, res, next) => {
                                     <a href="/topic/updata/${req.params.pageId}">updata</a><br>
                                     <form action="/topic/delete_process" method="POST" onsubmit="return confirm('정말로 삭제하시겠습니까?')">
                                     <input type="hidden" name="id" value="${req.params.pageId}">
+                                    <input type="hidden" name="title" value="${title}">
                                     <input type="submit" value="delete">
                                     </form>`);
 
